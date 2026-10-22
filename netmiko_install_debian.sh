@@ -2,26 +2,28 @@
 
 set -euo pipefail
 
-if [[ "$EUID" -ne 0 ]]; then
-        echo "You must be root to run this script..."
-        exit 1
-fi
-
 dir="/var/log/Install_Logs"
 file="/var/log/Install_Logs/install"
 timestamp=$(date +"%Y-%m-%d")
 
-function Validate_LogPath {
+updates=("apt-get update" "apt-get upgrade -y" "apt-get dist-upgrade -y" "apt-clean" "apt-get autoremove -y")
+dependencies=("python3" "python3-pip" "python3-venv" "build-essential" "libssl-dev" "libffi")
 
+function Validate_Root {
+        if [[ "$EUID" -ne 0 ]]; then
+                echo "You must be root to run this script..."
+                exit 1
+        fi
+}
+
+function Validate_LogPath {
         if [ ! -d "$dir" ]; then
                 echo "Creating directory $dir"
                 mkdir -v "$dir"
         fi
-
 }
 
 function Validate_LogFile {
-
         if [ ! -e "$file" ]; then
                 echo "Creating file: $file"
                 touch "$file"
@@ -29,27 +31,17 @@ function Validate_LogFile {
 }
 
 function System_Update {
-
-        local updates=("apt-get update"
-                "apt-get upgrade -y"
-                "apt-get dist-upgrade -y"
-                "apt-clean"
-                "apt-get autoremove -y"
-        )
-
         for i in "${updates[@]}"; do
                 if ! bash -c "$i"; then
                         echo "'$i': Failed to install..."
                         exit 1
                 fi
         done
-
+        
         echo "Updates Completed"
-
 }
 
 function Install-Pip {
-
         if command -v pip >/dev/null 2>&1; then
                 echo "Pip is installed..."
                 pip --version
@@ -64,19 +56,9 @@ function Install-Pip {
                 echo "Pip has been installed..."
                 pip --version
         fi
-
 }
 
 function Install_Dependencies {
-
-        local dependencies=("python3"
-                "python3-pip"
-                "python3-venv"
-                "build-essential"
-                "libssl-dev"
-                "libffi"
-        )
-
         for i in "${dependencies[@]}"; do
                 if ! bash -c "$i"; then
                         echo "'$i': Failed to install..."
@@ -87,7 +69,6 @@ function Install_Dependencies {
         done
 
         echo "Installation Complete"
-
 }
 
 
