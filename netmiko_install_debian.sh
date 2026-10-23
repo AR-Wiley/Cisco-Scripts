@@ -10,6 +10,7 @@ updates=("apt-get update" "apt-get upgrade -y" "apt-get dist-upgrade -y" "apt-cl
 dependencies=("python3" "python3-pip" "python3-venv" "build-essential" "libssl-dev" "libffi")
 
 function Validate_Root {
+
         if [[ "$EUID" -ne 0 ]]; then
                 echo "You must be root to run this script..."
                 exit 1
@@ -17,6 +18,9 @@ function Validate_Root {
 }
 
 function Validate_LogPath {
+
+        local dir="$1"
+
         if [ ! -d "$dir" ]; then
                 echo "Creating directory $dir"
                 mkdir -v "$dir"
@@ -24,6 +28,9 @@ function Validate_LogPath {
 }
 
 function Validate_LogFile {
+
+        local file="$1"
+
         if [ ! -e "$file" ]; then
                 echo "Creating file: $file"
                 touch "$file"
@@ -31,17 +38,21 @@ function Validate_LogFile {
 }
 
 function System_Update {
-        for i in "${updates[@]}"; do
+
+        local update="$1"
+
+        for i in "${update[@]}"; do
                 if ! bash -c "$i"; then
                         echo "'$i': Failed to install..."
                         exit 1
                 fi
         done
-        
+
         echo "Updates Completed"
 }
 
 function Install-Pip {
+
         if command -v pip >/dev/null 2>&1; then
                 echo "Pip is installed..."
                 pip --version
@@ -59,7 +70,10 @@ function Install-Pip {
 }
 
 function Install_Dependencies {
-        for i in "${dependencies[@]}"; do
+
+        local dependent="$1"
+
+        for i in "${dependent[@]}"; do
                 if ! bash -c "$i"; then
                         echo "'$i': Failed to install..."
                         exit 1
@@ -74,5 +88,18 @@ function Install_Dependencies {
 
 function Install_Netmiko {
 
+        if command -v netmiko >/dev/null 2>&1; then
+                echo "Netmiko is installed..."
+                netmiko --version
+        else
+                echo "Installing Netmiko..."
 
+                if ! apt install netmiko -y; then
+                        echo "Netmiko installation failes..."
+                        exit 1
+                fi
+
+                echo "Netmiko has been installed..."
+                netmiko --version
+        fi
 }
