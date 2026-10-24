@@ -103,3 +103,14 @@ function Install_Netmiko {
                 netmiko --version
         fi
 }
+
+
+Validate_Root
+Validate_LogPath "$dir"
+Validate_LogFile "$file"
+System_Update "$updates"
+Install-Pip
+Install_Dependencies "$dependencies"
+Install_Netmiko 
+
+
