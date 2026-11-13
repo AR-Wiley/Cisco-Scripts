@@ -21,7 +21,7 @@ def main():
     command = input("Command: ")
 
     switch = connect_device(host, username)
-    int_brief(switch, command)
+    run_command(switch, command)
 
 
 if __name__ == "__main__":
